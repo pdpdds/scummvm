@@ -20,6 +20,10 @@
  *
  */
 
+//20140521
+#include "BaseLib/XMLSerializer.h"
+//End
+
 #include "common/util.h"
 #include "common/stack.h"
 #include "common/system.h"
@@ -295,7 +299,26 @@ void GfxControls16::kernelDrawButton(Common::Rect rect, reg_t obj, const char *t
 		_paint16->frameRect(rect);
 		rect.grow(-2);
 		_ports->textGreyedOutput(!(style & SCI_CONTROLS_STYLE_ENABLED));
-		_text16->Box(text, false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
+
+	//20140521
+		//_text16->Box(text, false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
+
+		std::map<std::string, std::string>::iterator iter;
+		if(g_sci->_ScriptData)
+		{		
+			_ShouterInfo* pInfo = g_sci->_ScriptData->GetShouterInfo();
+			iter = pInfo->SentenceList.find(text);
+			if(iter == pInfo->SentenceList.end())
+				_text16->Box(text, false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
+			else
+				_text16->Box(iter->second.c_str(), false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
+		}
+		else
+		{
+			_text16->Box(text, false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
+		}
+//End
+
 		_ports->textGreyedOutput(false);
 		rect.grow(1);
 		if (style & SCI_CONTROLS_STYLE_SELECTED)
@@ -323,7 +346,23 @@ void GfxControls16::kernelDrawText(Common::Rect rect, reg_t obj, const char *tex
 		rect.grow(1);
 		_paint16->eraseRect(rect);
 		rect.grow(-1);
-		_text16->Box(text, false, rect, alignment, fontId);
+	//20140521
+		std::map<std::string, std::string>::iterator iter;
+		if(g_sci->_ScriptData)
+		{		
+			_ShouterInfo* pInfo = g_sci->_ScriptData->GetShouterInfo();
+			iter = pInfo->SentenceList.find(text);
+			if(iter == pInfo->SentenceList.end())
+				_text16->Box(text, false, rect, alignment, fontId);
+			else
+				_text16->Box(iter->second.c_str(), false, rect, alignment, fontId);
+		}
+		else
+		{
+			_text16->Box(text, false, rect, alignment, fontId);
+		}
+
+
 		if (style & SCI_CONTROLS_STYLE_SELECTED) {
 			_paint16->frameRect(rect);
 		}

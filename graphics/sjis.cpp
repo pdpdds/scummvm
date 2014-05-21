@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- *
  */
-
+#include <windows.h>
 #include "common/scummsys.h"
 #include "graphics/sjis.h"
 
@@ -33,33 +32,41 @@
 
 #include "graphics/surface.h"
 
+
 namespace Graphics {
 
+//20140521
 FontSJIS *FontSJIS::createFont(const Common::Platform platform) {
 	FontSJIS *ret = 0;
 
 	// Try the font ROM of the specified platform
 	if (platform == Common::kPlatformFMTowns) {
 		ret = new FontTowns();
-		if (ret->loadData())
-			return ret;
+		if (ret) {
+			if (ret->loadData())
+				return ret;
+		}
 		delete ret;
 	} else if (platform == Common::kPlatformPCEngine) {
 		ret = new FontPCEngine();
-		if (ret->loadData())
-			return ret;
+		if (ret) {
+			if (ret->loadData())
+				return ret;
+		}
 		delete ret;
 	} // TODO: PC98 font rom support
 	/* else if (platform == Common::kPlatformPC98) {
 		ret = new FontPC98();
-		if (ret->loadData())
-			return ret;
+		if (ret) {
+			if (ret->loadData())
+				return ret;
+		}
 		delete ret;
 	}*/
 
 	// Try ScummVM's font.
 	ret = new FontSjisSVM(platform);
-	if (ret->loadData())
+	if (ret && ret->loadData())
 		return ret;
 	delete ret;
 
@@ -215,7 +222,7 @@ void FontSJISBase::drawChar(void *dst, uint16 ch, int pitch, int bpp, uint32 c1,
 
 	if (isASCII(ch)) {
 		glyphSource = getCharData(ch);
-		width = 8;
+		width = 16;
 		height = _fontHeight;
 	} else {
 		glyphSource = getCharData(ch);
@@ -288,9 +295,10 @@ void FontSJISBase::drawChar(void *dst, uint16 ch, int pitch, int bpp, uint32 c1,
 }
 
 bool FontSJISBase::isASCII(uint16 ch) const {
-	if (ch >= 0xFF)
+	if (ch == 0xFF)
 		return false;
-	else if (ch <= 0x7F || (ch >= 0xA1 && ch <= 0xDF))
+	//else if (ch <= 0x7F || (ch >= 0xA1 && ch <= 0xDF))
+	else if (ch <= 0x7F)
 		return true;
 	else
 		return false;
@@ -519,17 +527,17 @@ FontSjisSVM::~FontSjisSVM() {
 }
 
 bool FontSjisSVM::loadData() {
-	Common::SeekableReadStream *data = SearchMan.createReadStreamForMember("SJIS.FNT");
+	Common::SeekableReadStream *data = SearchMan.createReadStreamForMember("Korean.FNT");
 	if (!data)
 		return false;
 
 	uint32 magic1 = data->readUint32BE();
 	uint32 magic2 = data->readUint32BE();
 
-	if (magic1 != MKTAG('S', 'C', 'V', 'M') || magic2 != MKTAG('S', 'J', 'I', 'S')) {
+	/*if (magic1 != MKTAG('S', 'C', 'V', 'M') || magic2 != MKTAG('S', 'J', 'I', 'S')) {
 		delete data;
 		return false;
-	}
+	}*/
 
 	uint32 version = data->readUint32BE();
 	if (version != kSjisFontVersion) {
@@ -547,10 +555,17 @@ bool FontSjisSVM::loadData() {
 		assert(_fontData16x16);
 		data->read(_fontData16x16, _fontData16x16Size);
 
-		_fontData8x16Size = numChars8x16 * 16;
-		_fontData8x16 = new uint8[numChars8x16 * 16];
+		_fontData8x16Size = numChars8x16 * 32;
+		_fontData8x16 = new uint8[_fontData8x16Size];
 		assert(_fontData8x16);
 		data->read(_fontData8x16, _fontData8x16Size);
+
+		_fontData12x12Size = numChars12x12 * 8;
+		_fontData12x12 = new uint8[_fontData12x12Size];
+		assert(_fontData12x12);
+		data->read(_fontData12x12, _fontData12x12Size);
+
+
 	} else {
 		data->skip(numChars16x16 * 32);
 		data->skip(numChars8x16 * 16);
@@ -560,7 +575,7 @@ bool FontSjisSVM::loadData() {
 		assert(_fontData12x12);
 		data->read(_fontData12x12, _fontData12x12Size);
 	}
-
+	
 	bool retValue = !data->err();
 	delete data;
 	return retValue;
@@ -601,7 +616,44 @@ const uint8 *FontSjisSVM::getCharDataPCE(uint16 c) const {
 }
 
 const uint8 *FontSjisSVM::getCharDataDefault(uint16 c) const {
-	const uint8 fB = c & 0xFF;
+	const uint8 fB = c & 0x00FF;
+	const uint8 sB = c >> 8;
+
+	if (isASCII(c)) {
+		int index = fB;
+
+		// half-width katakana
+		if (fB >= 0xA1 && fB <= 0xDF)
+			index -= 0x21;
+
+		const uint offset = index * 32;
+		assert(offset <= _fontData8x16Size);
+		return _fontData8x16 + offset;
+	} else {
+		//int base, index;
+		//mapKANJIChar(fB, sB, base, index);
+
+		wchar_t  wszBuffer[255];
+		int WrittenSize = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, (char*)(&c), 2, wszBuffer, 255);
+
+		uint unicode = wszBuffer[0];
+		//unicode = unicode << 8;
+		//unicode = unicode | wszBuffer[1];
+
+		int base = unicode - 0xac00;
+
+		if (base <= -1)
+			base = 0;
+
+		const uint offset = (base) * 32;
+		assert(offset  <= _fontData16x16Size);
+
+		return _fontData16x16 + offset;
+	}
+}
+
+const uint8 *FontSjisSVM::getCharData8x8(uint16 c) const {
+	const uint8 fB = c & 0x00FF;
 	const uint8 sB = c >> 8;
 
 	if (isASCII(c)) {
@@ -615,15 +667,25 @@ const uint8 *FontSjisSVM::getCharDataDefault(uint16 c) const {
 		assert(offset <= _fontData8x16Size);
 		return _fontData8x16 + offset;
 	} else {
-		int base, index;
-		mapKANJIChar(fB, sB, base, index);
+		//int base, index;
+		//mapKANJIChar(fB, sB, base, index);
 
-		if (base == -1)
-			return 0;
+		wchar_t  wszBuffer[255];
+		int WrittenSize = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, (char*)(&c), 2, wszBuffer, 255);
 
-		const uint offset = (base * 0xBC + index) * 32;
-		assert(offset + 16 <= _fontData16x16Size);
-		return _fontData16x16 + offset;
+		uint unicode = wszBuffer[0];
+		//unicode = unicode << 8;
+		//unicode = unicode | wszBuffer[1];
+
+		int base = unicode - 0xac00;
+
+		if (base <= -1)
+			base = 0;
+
+		const uint offset = (base) * 8;
+		assert(offset  <= _fontData12x12Size);
+
+		return _fontData12x12 + offset;
 	}
 }
 
@@ -647,6 +709,105 @@ void FontSjisSVM::mapKANJIChar(const uint8 fB, const uint8 sB, int &base, int &i
 	if (index < 0 || index >= 0xBC || base < 0)
 		base = index = -1;
 }
+
+FontKorSVM::FontKorSVM(const Common::Platform platform)
+	: _fontData8x8(0), _fontData8x8Size(0), _fontData4x8(0), _fontData4x8Size(0)
+{	
+	_fontWidth = 8;	
+	_fontHeight = 8;
+
+}
+
+FontKorSVM::~FontKorSVM() {
+	delete[] _fontData8x8;
+	delete[] _fontData4x8;
+
+}
+
+bool FontKorSVM::loadData() {
+	Common::SeekableReadStream *data = SearchMan.createReadStreamForMember("Korean.FNT");
+	if (!data)
+		return false;
+
+	uint32 magic1 = data->readUint32BE();
+	uint32 magic2 = data->readUint32BE();
+
+	/*if (magic1 != MKTAG('S', 'C', 'V', 'M') || magic2 != MKTAG('S', 'J', 'I', 'S')) {
+		delete data;
+		return false;
+	}*/
+
+	uint32 version = data->readUint32BE();
+	if (version != kSjisFontVersion) {
+		warning("SJIS font version mismatch, expected: %d found: %u", kSjisFontVersion, version);
+		delete data;
+		return false;
+	}
+	uint numChars8x8 = data->readUint16BE();
+	uint numChars4x8 = data->readUint16BE();
+	uint numChars12x12 = data->readUint16BE();
+
+	_fontData8x8Size = numChars8x8 * 16;
+	_fontData8x8 = new uint8[_fontData8x8Size];
+	assert(_fontData8x8);
+	data->read(_fontData8x8, _fontData8x8Size);
+
+	_fontData4x8Size = numChars4x8 * 8;
+	_fontData4x8 = new uint8[_fontData4x8Size];
+	assert(_fontData4x8);
+	data->read(_fontData4x8, _fontData4x8Size);
+
+	bool retValue = !data->err();
+	delete data;
+	return retValue;
+}
+
+bool FontKorSVM::hasFeature(int feat) const {
+	// Flipped mode is not supported since the hard coded table (taken from SCUMM 5 FM-TOWNS)
+	// is set up for font sizes of 8/16. This mode is also not required at the moment, since
+	// there aren't any SCUMM 5 PC-Engine games.
+	static const int features16 = kFeatDefault | kFeatOutline | kFeatShadow | kFeatFMTownsShadow | kFeatFlipped;
+	static const int features12 = kFeatDefault | kFeatOutline | kFeatShadow | kFeatFMTownsShadow;
+	return (((_fontWidth == 12) ? features12 : features16) & feat) ? true : false;
+}
+
+const uint8 *FontKorSVM::getCharData(uint16 c) const {
+	const uint8 fB = c & 0x00FF;
+	const uint8 sB = c >> 8;
+
+	if (isASCII(c)) {
+		int index = fB;
+
+		// half-width katakana
+		if (fB >= 0xA1 && fB <= 0xDF)
+			index -= 0x21;
+
+		const uint offset = index * 8;
+		assert(offset <= _fontData4x8Size);
+		return _fontData4x8 + offset;
+	} else {
+		//int base, index;
+		//mapKANJIChar(fB, sB, base, index);
+
+		wchar_t  wszBuffer[255];
+		int WrittenSize = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, (char*)(&c), 2, wszBuffer, 255);
+
+		uint unicode = wszBuffer[0];
+		//unicode = unicode << 8;
+		//unicode = unicode | wszBuffer[1];
+
+		int base = unicode - 0xac00;
+
+		if (base == -1)
+			return 0;
+
+		const uint offset = (base) * 16;
+		assert(offset  <= _fontData8x8Size);
+
+		return _fontData8x8 + offset;
+	}
+}
+
 
 } // End of namespace Graphics
 

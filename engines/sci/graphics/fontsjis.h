@@ -44,6 +44,8 @@ public:
 	bool isDoubleByte(uint16 chr);
 	byte getCharWidth(uint16 chr);
 	void draw(uint16 chr, int16 top, int16 left, byte color, bool greyedOutput);
+//20140521
+	virtual void drawToBuffer(uint16 chr, int16 top, int16 left, byte color, bool greyedOutput, byte *buffer, int16 bufWidth, int16 bufHeight);
 
 private:
 	GfxScreen *_screen;

@@ -32,6 +32,9 @@
 
 struct ADGameDescription;
 
+//20140521
+class XMLSerializer;
+
 /**
  * This is the namespace of the SCI engine.
  *
@@ -73,7 +76,12 @@ class GfxPalette;
 class GfxPorts;
 class GfxScreen;
 class GfxText16;
-class GfxText32;
+
+//20140521
+//class GfxText32;
+class GfxText32E;
+//End
+
 class GfxTransitions;
 
 #ifdef ENABLE_SCI32
@@ -343,10 +351,16 @@ public:
 	GfxPaint32 *_gfxPaint32; // Painting in 32-bit gfx
 	GfxPorts *_gfxPorts; // Port managment for 16-bit gfx
 	GfxScreen *_gfxScreen;
-	GfxText16 *_gfxText16;
-	GfxText32 *_gfxText32;
+	GfxText16 *_gfxText16;	
 	GfxTransitions *_gfxTransitions; // transitions between screens for 16-bit gfx
 	GfxMacIconBar *_gfxMacIconBar; // Mac Icon Bar manager
+	
+//20140521
+	//GfxText32 *_gfxText32;
+	GfxText32E *_gfxText32;	
+	::XMLSerializer* _ScriptData;
+	bool LoadTextXML(wchar_t* filename);
+//End
 
 #ifdef ENABLE_SCI32
 	RobotDecoder *_robotDecoder;

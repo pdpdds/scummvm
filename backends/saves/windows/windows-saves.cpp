@@ -45,7 +45,9 @@ WindowsSaveFileManager::WindowsSaveFileManager() {
 	GetVersionEx(&win32OsVersion);
 	// Check for non-9X version of Windows.
 	if (win32OsVersion.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS) {
+//20140108
 		// Use the Application Data directory of the user profile.
+/*
 		if (win32OsVersion.dwMajorVersion >= 5) {
 			if (!GetEnvironmentVariable("APPDATA", defaultSavepath, sizeof(defaultSavepath)))
 				error("Unable to access application data directory");
@@ -69,6 +71,13 @@ WindowsSaveFileManager::WindowsSaveFileManager() {
 				error("Cannot create ScummVM application data folder");
 		}
 
+		strcat(defaultSavepath, "\\Saved games");
+		if (!CreateDirectory(defaultSavepath, NULL)) {
+			if (GetLastError() != ERROR_ALREADY_EXISTS)
+				error("Cannot create ScummVM Saved games folder");
+		}
+	*/
+		GetCurrentDirectoryA(MAXPATHLEN, defaultSavepath);
 		strcat(defaultSavepath, "\\Saved games");
 		if (!CreateDirectory(defaultSavepath, NULL)) {
 			if (GetLastError() != ERROR_ALREADY_EXISTS)

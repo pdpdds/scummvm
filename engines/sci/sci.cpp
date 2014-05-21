@@ -20,6 +20,10 @@
  *
  */
 
+//20140521
+#include "BaseLib/XMLSerializer.h"
+#include "BaseLib/SFUtil.h"
+
 #include "common/system.h"
 #include "common/config-manager.h"
 #include "common/debug-channels.h"
@@ -67,6 +71,13 @@
 #include "sci/graphics/frameout.h"
 #include "sci/video/robot_decoder.h"
 #endif
+
+XMLSerializer* CreateSerializer()
+{
+	return new XMLSerializer();
+}
+//End
+
 
 namespace Sci {
 
@@ -204,6 +215,29 @@ Common::Error SciEngine::run() {
 	_resMan->addAppropriateSources();
 	_resMan->init();
 
+//20140521
+	_ScriptData = 0;
+
+	Common::String szCurDirectory = ConfMan.get("savepath");
+
+	if(g_sci->getGameId() == GID_KQ1)
+	{
+		LoadTextXML(L"kq1.xml");
+	}
+	else if(g_sci->getGameId() == GID_FAIRYTALES)
+	{
+		LoadTextXML(L"fairytale.xml");	
+	}
+	else if(g_sci->getGameId() == GID_SQ1)
+	{
+		LoadTextXML(L"sq1.xml");	
+	}
+	else if(g_sci->getGameId() == GID_SQ4)
+	{
+		LoadTextXML(L"sq4.xml");	
+	}	
+//End
+
 	// TODO: Add error handling. Check return values of addAppropriateSources
 	// and init. We first have to *add* sensible return values, though ;).
 /*
@@ -226,6 +260,11 @@ Common::Error SciEngine::run() {
 	// Initialize the game screen
 	_gfxScreen = new GfxScreen(_resMan);
 	_gfxScreen->enableUndithering(ConfMan.getBool("disable_dithering"));
+
+//20140521
+	if(g_sci->getGameId() ==GID_GK1)	
+		_gfxScreen->setFontIsUpscaled(true);
+//End
 
 	_kernel = new Kernel(_resMan, segMan);
 	_kernel->init();
@@ -657,7 +696,11 @@ void SciEngine::initGraphics() {
 		_gfxCompare = new GfxCompare(_gamestate->_segMan, _gfxCache, _gfxScreen, _gfxCoordAdjuster);
 		_gfxPaint32 = new GfxPaint32(_resMan, _gfxCoordAdjuster, _gfxScreen, _gfxPalette);
 		_gfxPaint = _gfxPaint32;
-		_gfxText32 = new GfxText32(_gamestate->_segMan, _gfxCache, _gfxScreen);
+
+//20140521
+		_gfxText32 = new GfxText32E(_gamestate->_segMan, _gfxCache, _gfxScreen);
+		//_gfxText32 = new GfxText32(_gamestate->_segMan, _gfxCache, _gfxScreen);
+//End		
 		_gfxControls32 = new GfxControls32(_gamestate->_segMan, _gfxCache, _gfxText32);
 		_robotDecoder = new RobotDecoder(getPlatform() == Common::kPlatformMacintosh);
 		_gfxFrameout = new GfxFrameout(_gamestate->_segMan, _resMan, _gfxCoordAdjuster, _gfxCache, _gfxScreen, _gfxPalette, _gfxPaint32);
@@ -790,9 +833,14 @@ const char *SciEngine::getGameIdStr() const {
 	return _gameDescription->gameid;
 }
 
+//20140521
 Common::Language SciEngine::getLanguage() const {
-	return _gameDescription->language;
+	return Common::JA_JPN;
 }
+
+/*Common::Language SciEngine::getLanguage() const {
+	return _gameDescription->language;
+}*/
 
 Common::Platform SciEngine::getPlatform() const {
 	return _gameDescription->platform;
@@ -986,6 +1034,37 @@ void SciEngine::loadMacExecutable() {
 		// TODO: Show some sort of warning dialog saying they can't get any
 		// high-res Mac fonts, when we get to that point ;)
 	}
+}
+
+//20140521
+bool SciEngine::LoadTextXML(wchar_t* filename)
+{
+	//SFUtil::SetCurDirToModuleDir();
+	//::XMLSerializer Shouter;
+	//_ShouterInfo* pInfo = Shouter.GetShouterInfo();
+	//pInfo->ShouterTitle = L"Notification";
+	//pInfo->StartTime = 0;
+	//pInfo->RepeatCount = 5;
+	//pInfo->SentenceInterval = 3000;
+	//pInfo->MessageInterval = 10000;
+	//pInfo->SentenceList.insert(std::make_pair("sdfdddsf","¾È³çÇÏ¼¼¿ä"));
+	//pInfo->SentenceList.insert(std::make_pair("sdfddsdsf","¾È³çÇÏ¼¼¿äss"));
+	//pInfo->SentenceList.insert(std::make_pair("sdsfdddsf","¾È³çÇÏ¼¼¿äss"));
+
+	//Shouter.Write(L"Shouter.xml");
+
+	_ScriptData = CreateSerializer();
+
+	_ScriptData->Initialize();
+	if(false == _ScriptData->Read(filename))
+	{
+		delete _ScriptData;
+		_ScriptData = 0;
+		return false;
+	}
+	_ShouterInfo* pInfo = _ScriptData->GetShouterInfo();
+
+	return true;
 }
 
 } // End of namespace Sci

@@ -61,6 +61,7 @@ void GfxCache::purgeViewCache() {
 	_cachedViews.clear();
 }
 
+//20140521
 GfxFont *GfxCache::getFont(GuiResourceId fontId) {
 	if (_cachedFonts.size() >= MAX_CACHED_FONTS)
 		purgeFontCache();

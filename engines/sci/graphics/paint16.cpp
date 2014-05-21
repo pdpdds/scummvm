@@ -20,6 +20,12 @@
  *
  */
 
+//20140521
+#include <map>
+#include <string>
+#include "Baselib/XMLSerializer.h"
+//End
+
 #include "sci/sci.h"
 #include "sci/engine/features.h"
 #include "sci/engine/state.h"
@@ -243,7 +249,9 @@ void GfxPaint16::fillRect(const Common::Rect &rect, int16 drawFlags, byte color,
 		} else { // just fill rect with color
 			for (y = r.top; y < r.bottom; y++) {
 				for (x = r.left; x < r.right; x++) {
-					_screen->putPixel(x, y, GFX_SCREEN_MASK_VISUAL, color, 0, 0);
+//20140521
+					if(y >= 0)															
+						_screen->putPixel(x, y, GFX_SCREEN_MASK_VISUAL, color, 0, 0);
 				}
 			}
 		}
@@ -571,8 +579,25 @@ reg_t GfxPaint16::kernelDisplay(const char *text, int argc, reg_t *argv) {
 		}
 	}
 
-	// now drawing the text
-	_text16->Size(rect, text, -1, width);
+//20140521 Text Exchange
+	std::map<std::string, std::string>::iterator iter;
+	if(g_sci->_ScriptData)
+	{		
+		_ShouterInfo* pInfo = g_sci->_ScriptData->GetShouterInfo();
+		iter = pInfo->SentenceList.find(text);
+		if(iter == pInfo->SentenceList.end())
+			_text16->Size(rect, text, -1, width);
+		else
+			_text16->Size(rect, iter->second.c_str(), -1, width);
+	}
+	else
+	{
+		// now drawing the text
+		_text16->Size(rect, text, -1, width);
+	}
+//End
+
+
 	rect.moveTo(_ports->getPort()->curLeft, _ports->getPort()->curTop);
 	// Note: This code has been found in SCI1 middle and newer games. It was
 	// previously only for SCI1 late and newer, but the LSL1 interpreter contains
@@ -588,7 +613,21 @@ reg_t GfxPaint16::kernelDisplay(const char *text, int argc, reg_t *argv) {
 		result = bitsSave(rect, GFX_SCREEN_MASK_VISUAL);
 	if (colorBack != -1)
 		fillRect(rect, GFX_SCREEN_MASK_VISUAL, colorBack, 0, 0);
-	_text16->Box(text, false, rect, alignment, -1);
+
+//20140521	
+	if(g_sci->_ScriptData)
+	{		
+		if(iter == g_sci->_ScriptData->GetShouterInfo()->SentenceList.end())
+			_text16->Box(text, false, rect, alignment, -1);
+		else
+			_text16->Box(iter->second.c_str(), false, rect, alignment, -1);
+	}
+	else
+	{
+		_text16->Box(text, false, rect, alignment, -1);
+	}
+//End
+
 	if (_screen->_picNotValid == 0 && bRedraw)
 		bitsShow(rect);
 	// restoring port and cursor pos

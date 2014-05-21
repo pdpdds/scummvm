@@ -316,7 +316,11 @@ int16 GfxText16::Size(Common::Rect &rect, const char *text, GuiResourceId fontId
 		fontId = previousFontId;
 
 	if (g_sci->getLanguage() == Common::JA_JPN)
+	{
+//20140521
+		fontId = 900;
 		SwitchToFont900OnSjis(text);
+	}
 
 	rect.top = rect.left = 0;
 
@@ -352,6 +356,8 @@ int16 GfxText16::Size(Common::Rect &rect, const char *text, GuiResourceId fontId
 void GfxText16::Draw(const char *text, int16 from, int16 len, GuiResourceId orgFontId, int16 orgPenColor) {
 	uint16 curChar, charWidth;
 	Common::Rect rect;
+//20140521
+	bool bDoubleByte = false;
 
 	GetFont();
 	if (!_font)
@@ -364,6 +370,8 @@ void GfxText16::Draw(const char *text, int16 from, int16 len, GuiResourceId orgF
 		curChar = (*(const byte *)text++);
 		if (_font->isDoubleByte(curChar)) {
 			curChar |= (*(const byte *)text++) << 8;
+//20140521
+			bDoubleByte = true;
 			len--;
 		}
 		switch (curChar) {
@@ -378,7 +386,16 @@ void GfxText16::Draw(const char *text, int16 from, int16 len, GuiResourceId orgF
 				break;
 			}
 		default:
-			charWidth = _font->getCharWidth(curChar);
+//20140521
+			//if(bDoubleByte == true)				
+				charWidth = _font->getCharWidth(curChar);
+			/*else
+			{
+
+				GfxFont* pFont = g_sci->_gfxCache->getFont(60);
+				charWidth = pFont->getCharWidth(curChar);
+			}*/
+
 			// clear char
 			if (_ports->_curPort->penMode == 1) {
 				rect.left = _ports->_curPort->curLeft;
@@ -386,7 +403,17 @@ void GfxText16::Draw(const char *text, int16 from, int16 len, GuiResourceId orgF
 				_paint16->eraseRect(rect);
 			}
 			// CharStd
-			_font->draw(curChar, _ports->_curPort->top + _ports->_curPort->curTop, _ports->_curPort->left + _ports->_curPort->curLeft, _ports->_curPort->penClr, _ports->_curPort->greyedOutput);
+			//if(bDoubleByte == true)			
+				_font->draw(curChar, _ports->_curPort->top + _ports->_curPort->curTop, _ports->_curPort->left + _ports->_curPort->curLeft, _ports->_curPort->penClr, _ports->_curPort->greyedOutput);
+			/*else
+			{
+
+				GfxFont* pFont = g_sci->_gfxCache->getFont(60);
+				pFont->draw(curChar, _ports->_curPort->top + _ports->_curPort->curTop, _ports->_curPort->left + _ports->_curPort->curLeft, _ports->_curPort->penClr, _ports->_curPort->greyedOutput);
+			}*/
+
+			bDoubleByte = false;
+
 			_ports->_curPort->curLeft += charWidth;
 		}
 	}
@@ -464,7 +491,8 @@ void GfxText16::Box(const char *text, bool show, const Common::Rect &rect, TextA
 	SetFont(previousFontId);
 	_ports->penColor(previousPenColor);
 
-	if (doubleByteMode) {
+//20140521 
+	/*if (doubleByteMode) {
 		// Kanji is written by pc98 rom to screen directly. Because of
 		// GetLongest() behavior (not cutting off the last char, that causes a
 		// new line), results in the script thinking that the text would need
@@ -481,7 +509,7 @@ void GfxText16::Box(const char *text, bool show, const Common::Rect &rect, TextA
 		kanjiRect.left *= 2; kanjiRect.right *= 2;
 		kanjiRect.top *= 2; kanjiRect.bottom *= 2;
 		_screen->copyDisplayRectToScreen(kanjiRect);
-	}
+	}*/
 }
 
 void GfxText16::DrawString(const char *text) {
@@ -519,14 +547,23 @@ void GfxText16::DrawStatus(const char *text) {
 	}
 }
 
+//20140521
 // Sierra did this in their PC98 interpreter only, they identify a text as being
 // sjis and then switch to font 900
 bool GfxText16::SwitchToFont900OnSjis(const char *text) {
 	byte firstChar = (*(const byte *)text++);
-	if (((firstChar >= 0x81) && (firstChar <= 0x9F)) || ((firstChar >= 0xE0) && (firstChar <= 0xEF))) {
-		SetFont(900);
-		return true;
+	//if (((firstChar >= 0x81) && (firstChar <= 0x9F)) || ((firstChar >= 0xE0) && (firstChar <= 0xEF))) {
+	while(firstChar != 0)
+	{
+		if (firstChar > 0x7F)
+		{
+			SetFont(900);
+			return true;
+		}
+
+		firstChar = (*(const byte *)text++);
 	}
+	//}
 	return false;
 }
 

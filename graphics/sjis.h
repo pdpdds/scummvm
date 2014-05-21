@@ -262,6 +262,8 @@ private:
 
 	const uint8 *getCharDataPCE(uint16 c) const;
 	const uint8 *getCharDataDefault(uint16 c) const;
+//20140521
+	const uint8 *getCharData8x8(uint16 c) const ;
 
 	void mapKANJIChar(const uint8 fB, const uint8 sB, int &base, int &index) const;
 
@@ -269,6 +271,35 @@ private:
 		kSjisFontVersion = 3
 	};
 };
+
+//20140521
+class FontKorSVM : public FontSJISBase {
+	friend class GfxFontSjis;
+public:
+	FontKorSVM(const Common::Platform platform);
+	~FontKorSVM();
+
+	/**
+	 * Load the font data from "SJIS.FNT".
+	 */
+	bool loadData();
+//private:
+	uint8 *_fontData8x8;
+	uint _fontData8x8Size;
+
+	uint8 *_fontData4x8;
+	uint _fontData4x8Size;
+
+	virtual const uint8 *getCharData(uint16 c) const;
+
+	bool hasFeature(int feat) const;
+
+
+	enum {
+		kSjisFontVersion = 3
+	};
+};
+
 
 // TODO: Consider adding support for PC98 ROM
 

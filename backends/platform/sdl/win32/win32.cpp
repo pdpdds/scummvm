@@ -61,7 +61,12 @@ void OSystem_Win32::init() {
 
 void OSystem_Win32::initBackend() {
 	// Console window is enabled by default on Windows
+//20140521
+#ifdef _DEBUG
 	ConfMan.registerDefault("console", true);
+#else
+	ConfMan.registerDefault("console", false);
+#endif
 
 	// Enable or disable the window console window
 	if (ConfMan.getBool("console")) {
@@ -226,7 +231,8 @@ Common::WriteStream *OSystem_Win32::createLogFile() {
 	// Check for non-9X version of Windows.
 	if (win32OsVersion.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS) {
 		// Use the Application Data directory of the user profile.
-		if (win32OsVersion.dwMajorVersion >= 5) {
+//2014521
+		/*if (win32OsVersion.dwMajorVersion >= 5) {
 			if (!GetEnvironmentVariable("APPDATA", logFile, sizeof(logFile)))
 				error("Unable to access application data directory");
 		} else {
@@ -239,6 +245,10 @@ Common::WriteStream *OSystem_Win32::createLogFile() {
 
 		strcat(logFile, "\\ScummVM");
 		CreateDirectory(logFile, NULL);
+		*/
+
+		GetCurrentDirectoryA(MAXPATHLEN, logFile);
+		
 		strcat(logFile, "\\Logs");
 		CreateDirectory(logFile, NULL);
 		strcat(logFile, "\\scummvm.log");

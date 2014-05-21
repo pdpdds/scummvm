@@ -35,7 +35,8 @@
 
 namespace Sci {
 
-GfxControls32::GfxControls32(SegManager *segMan, GfxCache *cache, GfxText32 *text)
+//20140521
+GfxControls32::GfxControls32(SegManager *segMan, GfxCache *cache, GfxText32E *text)
 	: _segMan(segMan), _cache(cache), _text(text) {
 }
 

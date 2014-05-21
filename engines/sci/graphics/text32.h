@@ -53,6 +53,35 @@ private:
 	GfxScreen *_screen;
 };
 
+//20140521
+class GfxText32E {
+public:
+	GfxText32E(SegManager *segMan, GfxCache *fonts, GfxScreen *screen);
+	~GfxText32E();
+	reg_t createTextBitmap(reg_t textObject, uint16 maxWidth = 0, uint16 maxHeight = 0, reg_t prevHunk = NULL_REG);
+	reg_t createScrollTextBitmap(Common::String text, reg_t textObject, uint16 maxWidth = 0, uint16 maxHeight = 0, reg_t prevHunk = NULL_REG);
+	void drawTextBitmap(int16 x, int16 y, Common::Rect planeRect, reg_t textObject);
+	void drawScrollTextBitmap(reg_t textObject, reg_t hunkId, uint16 x, uint16 y);
+	void disposeTextBitmap(reg_t hunkId);
+	int16 GetLongest(const char *text, int16 maxWidth, GfxFont *font);
+
+	void kernelTextSize(const char *text, int16 font, int16 maxWidth, int16 *textWidth, int16 *textHeight);
+
+private:
+	reg_t createTextBitmapInternal(Common::String &text, reg_t textObject, uint16 maxWidth, uint16 maxHeight, reg_t hunkId);
+	void drawTextBitmapInternal(int16 x, int16 y, Common::Rect planeRect, reg_t textObject, reg_t hunkId);
+	int16 Size(Common::Rect &rect, const char *text, GuiResourceId fontId, int16 maxWidth);
+	void Width(const char *text, int16 from, int16 len, GuiResourceId orgFontId, int16 &textWidth, int16 &textHeight, bool restoreFont);
+	void StringWidth(const char *str, GuiResourceId orgFontId, int16 &textWidth, int16 &textHeight);
+
+	int GetAppropriateFontId(int FontID);
+
+	SegManager *_segMan;
+	GfxCache *_cache;
+	GfxScreen *_screen;
+};
+//End
+
 } // End of namespace Sci
 
 #endif
