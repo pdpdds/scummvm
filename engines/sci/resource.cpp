@@ -677,6 +677,10 @@ int ResourceManager::addAppropriateSources() {
 //20140521
 	SearchMan.addDirectory(".\\SIERRA\\COMMON\\", ".\\SIERRA\\COMMON\\", -2);	
 
+	if (g_sci->getGameId() == GID_KQ6 && g_sci->isCD()) {
+		SearchMan.addDirectory(".\\SIERRA\\KQ6\\", ".\\SIERRA\\KQ6\\", -2);
+	}
+
 	if (g_sci->getGameId() == GID_SQ4 && g_sci->isCD()) {
 		SearchMan.addDirectory(".\\SIERRA\\LB2CD\\", ".\\SIERRA\\SQ4CD\\", -2);
 	}

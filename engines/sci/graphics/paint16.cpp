@@ -618,7 +618,7 @@ reg_t GfxPaint16::kernelDisplay(const char *text, int argc, reg_t *argv) {
 	if(g_sci->_ScriptData)
 	{		
 		if(iter == g_sci->_ScriptData->GetShouterInfo()->SentenceList.end())
-			_text16->Box(text, false, rect, alignment, -1);
+			_text16->Box(text, false, rect, alignment, -1, false);
 		else
 			_text16->Box(iter->second.c_str(), false, rect, alignment, -1);
 	}

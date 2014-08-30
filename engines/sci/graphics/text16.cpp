@@ -432,7 +432,7 @@ void GfxText16::Show(const char *text, int16 from, int16 len, GuiResourceId orgF
 }
 
 // Draws a text in rect.
-void GfxText16::Box(const char *text, bool show, const Common::Rect &rect, TextAlignment alignment, GuiResourceId fontId) {
+void GfxText16::Box(const char *text, bool show, const Common::Rect &rect, TextAlignment alignment, GuiResourceId fontId, bool redraw) {
 	int16 textWidth, maxTextWidth, textHeight, charCount;
 	int16 offset = 0;
 	int16 hline = 0;
@@ -492,7 +492,7 @@ void GfxText16::Box(const char *text, bool show, const Common::Rect &rect, TextA
 	_ports->penColor(previousPenColor);
 
 //20140521 
-	/*if (doubleByteMode) {
+	if (doubleByteMode && redraw == true) {
 		// Kanji is written by pc98 rom to screen directly. Because of
 		// GetLongest() behavior (not cutting off the last char, that causes a
 		// new line), results in the script thinking that the text would need
@@ -509,7 +509,7 @@ void GfxText16::Box(const char *text, bool show, const Common::Rect &rect, TextA
 		kanjiRect.left *= 2; kanjiRect.right *= 2;
 		kanjiRect.top *= 2; kanjiRect.bottom *= 2;
 		_screen->copyDisplayRectToScreen(kanjiRect);
-	}*/
+	}
 }
 
 void GfxText16::DrawString(const char *text) {

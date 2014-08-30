@@ -309,9 +309,9 @@ void GfxControls16::kernelDrawButton(Common::Rect rect, reg_t obj, const char *t
 			_ShouterInfo* pInfo = g_sci->_ScriptData->GetShouterInfo();
 			iter = pInfo->SentenceList.find(text);
 			if(iter == pInfo->SentenceList.end())
-				_text16->Box(text, false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
+				_text16->Box(text, false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId, true);
 			else
-				_text16->Box(iter->second.c_str(), false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
+				_text16->Box(iter->second.c_str(), false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId, true);
 		}
 		else
 		{
