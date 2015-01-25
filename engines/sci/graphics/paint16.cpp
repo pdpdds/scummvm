@@ -250,7 +250,7 @@ void GfxPaint16::fillRect(const Common::Rect &rect, int16 drawFlags, byte color,
 			for (y = r.top; y < r.bottom; y++) {
 				for (x = r.left; x < r.right; x++) {
 //20140521
-					if(y >= 0)															
+			//		if(y >= 0)															
 						_screen->putPixel(x, y, GFX_SCREEN_MASK_VISUAL, color, 0, 0);
 				}
 			}
