@@ -23,7 +23,7 @@
 //20140521
 #include <map>
 #include <string>
-#include "Baselib/XMLSerializer.h"
+//#include "Baselib/XMLSerializer.h"
 //End
 
 #include "sci/sci.h"
@@ -580,7 +580,7 @@ reg_t GfxPaint16::kernelDisplay(const char *text, int argc, reg_t *argv) {
 	}
 
 //20140521 Text Exchange
-	std::map<std::string, std::string>::iterator iter;
+	/*std::map<std::string, std::string>::iterator iter;
 	if(g_sci->_ScriptData)
 	{		
 		_ShouterInfo* pInfo = g_sci->_ScriptData->GetShouterInfo();
@@ -590,7 +590,7 @@ reg_t GfxPaint16::kernelDisplay(const char *text, int argc, reg_t *argv) {
 		else
 			_text16->Size(rect, iter->second.c_str(), -1, width);
 	}
-	else
+	else*/
 	{
 		// now drawing the text
 		_text16->Size(rect, text, -1, width);
@@ -615,14 +615,14 @@ reg_t GfxPaint16::kernelDisplay(const char *text, int argc, reg_t *argv) {
 		fillRect(rect, GFX_SCREEN_MASK_VISUAL, colorBack, 0, 0);
 
 //20140521	
-	if(g_sci->_ScriptData)
+/*	if(g_sci->_ScriptData)
 	{		
 		if(iter == g_sci->_ScriptData->GetShouterInfo()->SentenceList.end())
 			_text16->Box(text, false, rect, alignment, -1, false);
 		else
 			_text16->Box(iter->second.c_str(), false, rect, alignment, -1);
 	}
-	else
+	else*/
 	{
 		_text16->Box(text, false, rect, alignment, -1);
 	}

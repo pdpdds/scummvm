@@ -543,7 +543,7 @@ void ResourceSource::loadResource(ResourceManager *resMan, Resource *res) {
 	fileStream->seek(res->_fileOffset, SEEK_SET);
 
 	int error = 0;
-	switch(g_sci->getGameId())
+	/*switch(g_sci->getGameId())
 	{
 	case GID_KQ1:
 		{
@@ -584,9 +584,10 @@ void ResourceSource::loadResource(ResourceManager *resMan, Resource *res) {
 		{
 			error = res->decompress(resMan->getVolVersion(), fileStream);
 		}
-	}
+	}*/
 
-	
+	error = res->decompress(resMan->getVolVersion(), fileStream);
+
 	if (error) {
 		warning("Error %d occurred while reading %s from resource file %s: %s",
 				error, res->_id.toString().c_str(), res->getResourceLocation().c_str(),

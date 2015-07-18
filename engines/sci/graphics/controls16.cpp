@@ -21,7 +21,7 @@
  */
 
 //20140521
-#include "BaseLib/XMLSerializer.h"
+//#include "BaseLib/XMLSerializer.h"
 //End
 
 #include "common/util.h"
@@ -303,7 +303,7 @@ void GfxControls16::kernelDrawButton(Common::Rect rect, reg_t obj, const char *t
 	//20140521
 		//_text16->Box(text, false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
 
-		std::map<std::string, std::string>::iterator iter;
+	/*	std::map<std::string, std::string>::iterator iter;
 		if(g_sci->_ScriptData)
 		{		
 			_ShouterInfo* pInfo = g_sci->_ScriptData->GetShouterInfo();
@@ -313,7 +313,7 @@ void GfxControls16::kernelDrawButton(Common::Rect rect, reg_t obj, const char *t
 			else
 				_text16->Box(iter->second.c_str(), false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId, true);
 		}
-		else
+		else*/
 		{
 			_text16->Box(text, false, rect, SCI_TEXT16_ALIGNMENT_CENTER, fontId);
 		}
@@ -347,7 +347,7 @@ void GfxControls16::kernelDrawText(Common::Rect rect, reg_t obj, const char *tex
 		_paint16->eraseRect(rect);
 		rect.grow(-1);
 	//20140521
-		std::map<std::string, std::string>::iterator iter;
+		/*std::map<std::string, std::string>::iterator iter;
 		if(g_sci->_ScriptData)
 		{		
 			_ShouterInfo* pInfo = g_sci->_ScriptData->GetShouterInfo();
@@ -357,7 +357,7 @@ void GfxControls16::kernelDrawText(Common::Rect rect, reg_t obj, const char *tex
 			else
 				_text16->Box(iter->second.c_str(), false, rect, alignment, fontId);
 		}
-		else
+		else*/
 		{
 			_text16->Box(text, false, rect, alignment, fontId);
 		}

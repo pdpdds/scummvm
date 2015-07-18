@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
-#include "IXMLStreamReader.h"
-#include "IXMLStreamWriter.h"
+#include "XML/IXMLStreamReader.h"
+#include "XML/IXMLStreamWriter.h"
 //////////////////////////////////////////////////////////////
 //Shouter Structure
 //////////////////////////////////////////////////////////////
