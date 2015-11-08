@@ -39,10 +39,12 @@
 #include "backends/plugins/sdl/sdl-provider.h"
 #include "base/main.h"
 
-//int __stdcall WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,  LPSTR /*lpCmdLine*/, int /*iShowCmd*/) {
-	//SDL_SetModuleHandle(GetModuleHandle(NULL));
-	//return main(__argc, __argv);
-//}
+#ifndef _DEBUG
+int __stdcall WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,  LPSTR /*lpCmdLine*/, int /*iShowCmd*/) {
+	SDL_SetModuleHandle(GetModuleHandle(NULL));
+	return main(0, NULL);
+}
+#endif
 
 int main(int argc, char *argv[]) {
 	// Create our OSystem instance

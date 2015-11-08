@@ -543,7 +543,7 @@ void ResourceSource::loadResource(ResourceManager *resMan, Resource *res) {
 	fileStream->seek(res->_fileOffset, SEEK_SET);
 
 	int error = 0;
-	/*switch(g_sci->getGameId())
+	switch(g_sci->getGameId())
 	{
 	case GID_KQ1:
 		{
@@ -584,9 +584,9 @@ void ResourceSource::loadResource(ResourceManager *resMan, Resource *res) {
 		{
 			error = res->decompress(resMan->getVolVersion(), fileStream);
 		}
-	}*/
+	}
 
-	error = res->decompress(resMan->getVolVersion(), fileStream);
+	//error = res->decompress(resMan->getVolVersion(), fileStream);
 
 	if (error) {
 		warning("Error %d occurred while reading %s from resource file %s: %s",
@@ -677,7 +677,12 @@ int ResourceManager::addAppropriateSources() {
 
 //20140521
 	SearchMan.addDirectory(".\\SIERRA\\COMMON\\", ".\\SIERRA\\COMMON\\", -2);	
+	
 
+	if (g_sci->getGameId() == GID_ECOQUEST && g_sci->isCD())
+	{
+		SearchMan.addDirectory(".\\SIERRA\\ECO1\\", ".\\SIERRA\\ECO1\\", -2);
+	}
 	if (g_sci->getGameId() == GID_KQ6 && g_sci->isCD()) {
 		SearchMan.addDirectory(".\\SIERRA\\KQ6\\", ".\\SIERRA\\KQ6\\", -2);
 	}
@@ -1586,7 +1591,7 @@ void ResourceManager::readResourcePatches() {
 			g_sci->getGameId() == GID_SQ4 || 			
 			g_sci->getGameId() == GID_LAURABOW2 || 
 			g_sci->getGameId() == GID_FREDDYPHARKAS ||
-			g_sci->getGameId() == GID_SQ4)
+			g_sci->getGameId() == GID_ECOQUEST)
 			if(g_sci->isCD() && i == kResourceTypeMessage)
 				continue;
 
@@ -1759,9 +1764,19 @@ int ResourceManager::readResourceMapSCI1(ResourceSource *map) {
 	do {
 		type = fileStream->readByte() & 0x1F;
 		resMap[type].wOffset = fileStream->readUint16LE();
-		resMap[prevtype].wSize = (resMap[type].wOffset
-			- resMap[prevtype].wOffset) / nEntrySize;
-		prevtype = type;
+
+		if (strcmpi(map->getLocationName().c_str(), "Message.map") == 0 && g_sci->getGameId() == GID_ECOQUEST)
+		{
+			resMap[prevtype].wSize = (resMap[type].wOffset
+				- resMap[prevtype].wOffset) / SCI1_RESMAP_ENTRIES_SIZE;
+			prevtype = type;
+		}
+		else
+		{
+			resMap[prevtype].wSize = (resMap[type].wOffset
+				- resMap[prevtype].wOffset) / nEntrySize;
+			prevtype = type;
+		}
 	} while (type != 0x1F); // the last entry is FF
 
 	// reading each type's offsets
@@ -1829,6 +1844,18 @@ int ResourceManager::readResourceMapSCI1(ResourceSource *map) {
 					volume_nr = fileOffset >> 28; // most significant 4 bits
 					fileOffset &= 0x0FFFFFFF;     // least significant 28 bits
 				} else {
+					// in SCI32 it's a plain offset
+				}
+			}
+			else if (type == kResourceTypeMessage && strcmpi(map->getLocationName().c_str(), "Message.map") == 0 && g_sci->getGameId() == GID_ECOQUEST)
+			{
+				// offset/volume stored in 4 bytes
+				fileOffset = fileStream->readUint32LE();
+				if (_mapVersion < kResVersionSci11) {
+					volume_nr = fileOffset >> 28; // most significant 4 bits
+					fileOffset &= 0x0FFFFFFF;     // least significant 28 bits
+				}
+				else {
 					// in SCI32 it's a plain offset
 				}
 			}
@@ -2035,14 +2062,11 @@ int Resource::readResourceInfo(ResVersion volVersion, Common::SeekableReadStream
 		type = _resMan->convertResType(file->readByte());
 		number = file->readUint16LE();
 //20140521
-			if (g_sci->getGameId() == GID_GK1)
+			//if (g_sci->getGameId() == GID_GK1)
 			{
 				szPacked = file->readUint16LE();
 			}
-			else
-			{
-				szPacked = file->readUint16LE() - 4;
-			}
+			
 //End
 		
 		szUnpacked = file->readUint16LE();
