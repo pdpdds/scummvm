@@ -33,7 +33,7 @@
 struct ADGameDescription;
 
 //20140521
-//class XMLSerializer;
+class XMLSerializer;
 
 /**
  * This is the namespace of the SCI engine.
@@ -358,8 +358,8 @@ public:
 //20140521
 	//GfxText32 *_gfxText32;
 	GfxText32E *_gfxText32;	
-	//::XMLSerializer* _ScriptData;
-	//bool LoadTextXML(wchar_t* filename);
+	::XMLSerializer* _ScriptData;
+	bool LoadTextXML(wchar_t* filename);
 //End
 
 #ifdef ENABLE_SCI32

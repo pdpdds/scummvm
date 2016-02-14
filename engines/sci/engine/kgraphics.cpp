@@ -790,6 +790,14 @@ Common::Rect kControlCreateRect(int16 x, int16 y, int16 x1, int16 y1) {
 	return Common::Rect(x, y, x1, y1);
 }
 
+bool KQ5EsacapeView(int16 viewId, int16 loopNo, int16 celNo)
+{
+	if (viewId == 945 && loopNo == 0 && celNo == 2)
+		return true;
+
+	return false;
+}
+
 void _k_GenericDrawControl(EngineState *s, reg_t controlObject, bool hilite) {
 	int16 type = readSelectorValue(s->_segMan, controlObject, SELECTOR(type));
 	int16 style = readSelectorValue(s->_segMan, controlObject, SELECTOR(state));
@@ -845,20 +853,24 @@ void _k_GenericDrawControl(EngineState *s, reg_t controlObject, bool hilite) {
 		return;
 
 	case SCI_CONTROLS_TYPE_ICON:
-		viewId = readSelectorValue(s->_segMan, controlObject, SELECTOR(view));
-		{
-			int l = readSelectorValue(s->_segMan, controlObject, SELECTOR(loop));
-			loopNo = (l & 0x80) ? l - 256 : l;
-			int c = readSelectorValue(s->_segMan, controlObject, SELECTOR(cel));
-			celNo = (c & 0x80) ? c - 256 : c;
-			// Check if the control object specifies a priority selector (like in Jones)
-			if (lookupSelector(s->_segMan, controlObject, SELECTOR(priority), NULL, NULL) == kSelectorVariable)
-				priority = readSelectorValue(s->_segMan, controlObject, SELECTOR(priority));
-			else
-				priority = -1;
-		}
-		debugC(kDebugLevelGraphics, "drawing icon control %04x:%04x to %d,%d", PRINT_REG(controlObject), x, y - 1);
-		g_sci->_gfxControls16->kernelDrawIcon(rect, controlObject, viewId, loopNo, celNo, priority, style, hilite);
+			viewId = readSelectorValue(s->_segMan, controlObject, SELECTOR(view));
+			{
+				int l = readSelectorValue(s->_segMan, controlObject, SELECTOR(loop));
+				loopNo = (l & 0x80) ? l - 256 : l;
+				int c = readSelectorValue(s->_segMan, controlObject, SELECTOR(cel));
+				celNo = (c & 0x80) ? c - 256 : c;
+				// Check if the control object specifies a priority selector (like in Jones)
+				if (lookupSelector(s->_segMan, controlObject, SELECTOR(priority), NULL, NULL) == kSelectorVariable)
+					priority = readSelectorValue(s->_segMan, controlObject, SELECTOR(priority));
+				else
+					priority = -1;
+			}
+			//20160208
+			if (g_sci->getGameId() != GID_KQ5 || !KQ5EsacapeView(viewId, loopNo, celNo))
+			{
+				debugC(kDebugLevelGraphics, "drawing icon control %04x:%04x to %d,%d", PRINT_REG(controlObject), x, y - 1);
+				g_sci->_gfxControls16->kernelDrawIcon(rect, controlObject, viewId, loopNo, celNo, priority, style, hilite);
+			}
 		return;
 
 	case SCI_CONTROLS_TYPE_LIST:

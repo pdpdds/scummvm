@@ -546,7 +546,7 @@ void ResourceSource::loadResource(ResourceManager *resMan, Resource *res) {
 	switch(g_sci->getGameId())
 	{
 	case GID_KQ1:
-	//case GID_KQ5:
+	case GID_KQ5:
 		{
 			if(res->getType() == kResourceTypeText)//Text data
 			{
@@ -707,8 +707,11 @@ int ResourceManager::addAppropriateSources() {
 	if (g_sci->getGameId() == GID_KQ1) {
 		SearchMan.addDirectory(".\\SIERRA\\KQ1\\", ".\\SIERRA\\KQ1\\", -2);	
 	}
-	if (g_sci->getGameId() == GID_KQ5) {
+	if (g_sci->getGameId() == GID_KQ5 && g_sci->getPlatform() == Common::kPlatformPC98) {
 		SearchMan.addDirectory(".\\SIERRA\\KQ5PC98\\", ".\\SIERRA\\KQ5PC98\\", -2);
+	}
+	if (g_sci->getGameId() == GID_KQ5 && g_sci->getPlatform() == Common::kPlatformDOS) {
+		SearchMan.addDirectory(".\\SIERRA\\KQ5\\", ".\\SIERRA\\KQ5\\", -2);
 	}
 	if(g_sci->getGameId() == GID_MOTHERGOOSE ||
 		g_sci->getGameId() == GID_MOTHERGOOSEHIRES ||
@@ -1684,13 +1687,13 @@ int ResourceManager::readResourceMapSCI0(ResourceSource *map) {
 			return readResourceMapSCI1(map);
 		}
 	}
-	/*if (g_sci && g_sci->getGameId() == GID_KQ5)
+	if (g_sci && g_sci->getGameId() == GID_KQ5)
 	{
 		if (strcmpi(map->getLocationName().c_str(), "text.map") == 0)//Text data
 		{
 			return readResourceMapSCI1(map);
 		}
-	}*/
+	}
 //End
 
 	if (map->_resourceFile) {

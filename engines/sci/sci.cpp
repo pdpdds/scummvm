@@ -21,8 +21,8 @@
  */
 
 //20140521
-//#include "BaseLib/XMLSerializer.h"
-//#include "BaseLib/SFUtil.h"
+#include "BaseLib/XMLSerializer.h"
+#include "BaseLib/SFUtil.h"
 
 #include "common/system.h"
 #include "common/config-manager.h"
@@ -72,10 +72,10 @@
 #include "sci/video/robot_decoder.h"
 #endif
 
-/*XMLSerializer* CreateSerializer()
+XMLSerializer* CreateSerializer()
 {
 	return new XMLSerializer();
-}*/
+}
 //End
 
 
@@ -216,13 +216,17 @@ Common::Error SciEngine::run() {
 	_resMan->init();
 
 //20140521
-	/*_ScriptData = 0;
+	_ScriptData = 0;
 
 	Common::String szCurDirectory = ConfMan.get("savepath");
 
 	if(g_sci->getGameId() == GID_KQ1)
 	{
 		LoadTextXML(L"kq1.xml");
+	}
+	if (g_sci->getGameId() == GID_KQ5 && g_sci->getPlatform() == Common::kPlatformDOS)
+	{
+		LoadTextXML(L"kq5.xml");
 	}
 	else if(g_sci->getGameId() == GID_FAIRYTALES)
 	{
@@ -235,7 +239,7 @@ Common::Error SciEngine::run() {
 	else if(g_sci->getGameId() == GID_SQ4)
 	{
 		LoadTextXML(L"sq4.xml");	
-	}	*/
+	}
 //End
 
 	// TODO: Add error handling. Check return values of addAppropriateSources
@@ -1037,8 +1041,8 @@ void SciEngine::loadMacExecutable() {
 }
 
 //20140521
-//bool SciEngine::LoadTextXML(wchar_t* filename)
-//{
+bool SciEngine::LoadTextXML(wchar_t* filename)
+{
 	//SFUtil::SetCurDirToModuleDir();
 	//::XMLSerializer Shouter;
 	//_ShouterInfo* pInfo = Shouter.GetShouterInfo();
@@ -1053,7 +1057,7 @@ void SciEngine::loadMacExecutable() {
 
 	//Shouter.Write(L"Shouter.xml");
 
-	/*_ScriptData = CreateSerializer();
+	_ScriptData = CreateSerializer();
 
 	_ScriptData->Initialize();
 	if(false == _ScriptData->Read(filename))
@@ -1062,9 +1066,9 @@ void SciEngine::loadMacExecutable() {
 		_ScriptData = 0;
 		return false;
 	}
-	_ShouterInfo* pInfo = _ScriptData->GetShouterInfo();*/
+	_ShouterInfo* pInfo = _ScriptData->GetShouterInfo();
 
-	//return true;
-//}
+	return true;
+}
 
 } // End of namespace Sci
